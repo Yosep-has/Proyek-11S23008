@@ -2,6 +2,15 @@ import { useDispatch } from 'react-redux';
 import { asyncAddCashFlow } from '../states/action';
 import useInput from '../../../hooks/useInput';
 
+// Fungsi untuk mendapatkan tanggal hari ini dalam format YYYY-MM-DD
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 function AddTransactionModal({ show, onClose }) {
   const dispatch = useDispatch();
 
@@ -10,9 +19,11 @@ function AddTransactionModal({ show, onClose }) {
   const [label, onLabelChange] = useInput('');
   const [description, onDescriptionChange] = useInput('');
   const [nominal, onNominalChange] = useInput('');
+  // State baru untuk tanggal, defaultnya hari ini
+  const [date, onDateChange] = useInput(getTodayDate());
 
   function handleSave() {
-    if (!label || !description || !nominal) {
+    if (!label || !description || !nominal || !date) {
       alert("Semua field harus diisi!");
       return;
     }
@@ -23,6 +34,9 @@ function AddTransactionModal({ show, onClose }) {
     formData.append('label', label);
     formData.append('description', description);
     formData.append('nominal', nominal);
+    // Tambahkan tanggal ke FormData. API akan menerima ini sebagai 'created_at'.
+    // Kita tambahkan waktu agar sesuai format timestamp.
+    formData.append('created_at', `${date} 00:00:00`);
 
     dispatch(asyncAddCashFlow(formData, onClose));
   }
@@ -40,6 +54,11 @@ function AddTransactionModal({ show, onClose }) {
               <button type="button" className="btn-close" onClick={onClose}></button>
             </div>
             <div className="modal-body">
+              {/* Input Tanggal Baru */}
+              <div className="mb-3">
+                <label className="form-label">Tanggal Transaksi</label>
+                <input type="date" className="form-control" value={date} onChange={onDateChange} />
+              </div>
               <div className="mb-3">
                 <label className="form-label">Tipe</label>
                 <select className="form-select" value={type} onChange={onTypeChange}>

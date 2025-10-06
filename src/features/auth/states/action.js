@@ -1,60 +1,52 @@
-import cashFlowsApi from '../api/cashFlowsApi';
-import { showSuccessDialog, showErrorDialog, showConfirmDialog } from '../../../helpers/toolsHelper';
+import apiHelper from '../../../helpers/apiHelper';
+import authApi from '../api/authApi'; // <-- Seharusnya mengimpor dari sini
+import { showSuccessDialog, showErrorDialog } from '../../../helpers/toolsHelper';
 
 export const ActionType = {
-  SET_CASH_FLOWS: 'SET_CASH_FLOWS',
-  SET_STATS: 'SET_STATS',
-  ADD_CASH_FLOW: 'ADD_CASH_FLOW',
+  SET_AUTH_USER: 'SET_AUTH_USER',
+  UNSET_AUTH_USER: 'UNSET_AUTH_USER',
 };
 
-// Action creators (tidak ada perubahan di sini)
-export function setCashFlowsActionCreator(cashFlows) {
-  return { type: ActionType.SET_CASH_FLOWS, payload: cashFlows };
+export function setAuthUserActionCreator(authUser) {
+  return { type: ActionType.SET_AUTH_USER, payload: authUser };
 }
 
-export function setStatsActionCreator(stats) {
-    return { type: ActionType.SET_STATS, payload: stats };
+export function unsetAuthUserActionCreator() {
+  return { type: ActionType.UNSET_AUTH_USER };
 }
 
-// Thunks (Async Actions)
-export function asyncGetAllCashFlows(params) {
+// Thunk untuk proses login
+export function asyncSetAuthUser({ email, password }, navigate) {
   return async (dispatch) => {
     try {
-      const { cash_flows, stats } = await cashFlowsApi.getAllCashFlows(params);
-      dispatch(setCashFlowsActionCreator(cash_flows));
-      dispatch(setStatsActionCreator(stats));
+      const token = await authApi.login({ email, password });
+      apiHelper.putAccessToken(token);
+      dispatch(setAuthUserActionCreator({ token }));
+      navigate('/');
     } catch (error) {
       showErrorDialog(error.message);
     }
   };
 }
 
-export function asyncAddCashFlow(formData, onSuccess) {
-    return async (dispatch) => {
-        try {
-            const { cash_flow_id } = await cashFlowsApi.addCashFlow(formData);
-            showSuccessDialog('Berhasil menambahkan data');
-            dispatch(asyncGetAllCashFlows());
-            if (onSuccess) onSuccess();
-        } catch (error) {
-            showErrorDialog(error.message);
-        }
+// Thunk untuk proses logout
+export function asyncUnsetAuthUser(navigate) {
+    return (dispatch) => {
+        apiHelper.putAccessToken('');
+        dispatch(unsetAuthUserActionCreator());
+        navigate('/auth/login');
     };
 }
 
-// THUNK BARU UNTUK FUNGSI HAPUS
-export function asyncDeleteCashFlow(id) {
-  return async (dispatch) => {
-    const confirmation = await showConfirmDialog('Apakah Anda yakin ingin menghapus transaksi ini?');
-    if (confirmation.isConfirmed) {
-      try {
-        const message = await cashFlowsApi.deleteCashFlow(id);
-        showSuccessDialog(message);
-        // Muat ulang semua data setelah berhasil menghapus
-        dispatch(asyncGetAllCashFlows());
-      } catch (error) {
-        showErrorDialog(error.message);
-      }
+// Thunk untuk registrasi
+export function asyncRegisterUser({ name, email, password }, navigate) {
+  return async () => {
+    try {
+      const message = await authApi.register({ name, email, password });
+      showSuccessDialog(message);
+      navigate('/auth/login');
+    } catch (error) {
+      showErrorDialog(error.message);
     }
   };
 }
