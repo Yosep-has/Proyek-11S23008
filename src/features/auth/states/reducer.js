@@ -1,14 +1,27 @@
-import { ActionType } from './action';
+import { ActionType } from "./action";
 
-function authUserReducer(state = null, action) {
+// Perbarui state awal untuk menampung data statistik
+const initialState = {
+  list: [],
+  stats: {},
+  statsDaily: null,
+  statsMonthly: null,
+};
+
+function transactionsReducer(state = initialState, action) {
   switch (action.type) {
-    case ActionType.SET_AUTH_USER:
-      return action.payload;
-    case ActionType.UNSET_AUTH_USER:
-      return null;
+    case ActionType.SET_CASH_FLOWS:
+      return { ...state, list: action.payload };
+    case ActionType.SET_STATS:
+      return { ...state, stats: action.payload };
+    // Tambahkan case baru untuk menangani data statistik
+    case ActionType.SET_STATS_DAILY:
+      return { ...state, statsDaily: action.payload };
+    case ActionType.SET_STATS_MONTHLY:
+      return { ...state, statsMonthly: action.payload };
     default:
       return state;
   }
 }
 
-export default authUserReducer;
+export default transactionsReducer;

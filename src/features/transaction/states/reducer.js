@@ -1,6 +1,5 @@
 import { ActionType } from "./action";
 
-// Perbarui state awal untuk menampung data statistik
 const initialState = {
   list: [],
   stats: {},
@@ -14,7 +13,7 @@ function transactionsReducer(state = initialState, action) {
       return { ...state, list: action.payload };
     case ActionType.SET_STATS:
       return { ...state, stats: action.payload };
-    // Tambahkan case baru untuk menangani data statistik
+    // CASE BARU UNTUK MENANGANI DATA STATISTIK
     case ActionType.SET_STATS_DAILY:
       return { ...state, statsDaily: action.payload };
     case ActionType.SET_STATS_MONTHLY:
