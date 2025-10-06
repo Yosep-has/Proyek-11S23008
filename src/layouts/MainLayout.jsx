@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import apiHelper from '../helpers/apiHelper'; // Asumsi Anda punya file ini
+import apiHelper from '../helpers/apiHelper';
 
 function MainLayout() {
   const navigate = useNavigate();
@@ -16,9 +16,9 @@ function MainLayout() {
 
   return (
     <div>
-      {/* Di sini Anda bisa menaruh Navbar jika ada */}
       <main>
-        <Outlet /> {/* Ini akan merender DashboardPage atau halaman terproteksi lainnya */}
+        {/* Outlet akan merender DashboardPage setelah token dipastikan ada */}
+        <Outlet />
       </main>
     </div>
   );

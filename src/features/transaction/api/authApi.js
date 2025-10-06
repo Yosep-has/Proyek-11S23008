@@ -14,6 +14,7 @@ const authApi = (() => {
     return data.token;
   }
 
+  // Fungsi baru untuk registrasi
   async function register({ name, email, password }) {
     const response = await apiHelper.fetchData(`${BASE_URL}/register`, {
       method: 'POST',
@@ -22,10 +23,10 @@ const authApi = (() => {
     });
     const { success, message } = await response.json();
     if (!success) throw new Error(message);
-    return message;
+    return message; // Mengembalikan pesan sukses
   }
 
-  return { login, register }; // <-- Perbaikan ada di baris ini
+  return { login, register }; // Ekspor fungsi register
 })();
 
 export default authApi;

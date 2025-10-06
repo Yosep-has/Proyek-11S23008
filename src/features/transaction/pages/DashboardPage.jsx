@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { asyncGetAllCashFlows } from '../states/action';
+import { asyncGetAllCashFlows, asyncDeleteCashFlow } from '../states/action';
 import { asyncUnsetAuthUser } from '../../auth/states/action';
 import AddTransactionModal from '../modals/AddTransactionModal';
 
@@ -17,6 +17,10 @@ function DashboardPage() {
 
   const handleLogout = () => {
     dispatch(asyncUnsetAuthUser(navigate));
+  };
+
+  const handleDelete = (id) => {
+    dispatch(asyncDeleteCashFlow(id));
   };
 
   const formatCurrency = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number || 0);
@@ -72,6 +76,7 @@ function DashboardPage() {
             <th>Label</th>
             <th>Tipe</th>
             <th className="text-end">Nominal</th>
+            <th className="text-center">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -86,6 +91,11 @@ function DashboardPage() {
               </td>
               <td className={`text-end fw-medium ${trx.type === 'inflow' ? 'text-success' : 'text-danger'}`}>
                 {formatCurrency(trx.nominal)}
+              </td>
+              <td className="text-center">
+                <button className="btn btn-danger btn-sm" onClick={() => handleDelete(trx.id)}>
+                  <i className="bi bi-trash"></i>
+                </button>
               </td>
             </tr>
           ))}

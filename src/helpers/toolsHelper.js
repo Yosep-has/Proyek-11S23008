@@ -17,3 +17,15 @@ export function showSuccessDialog(message) {
     confirmButtonText: "Tutup",
   });
 }
+
+// TAMBAHKAN FUNGSI INI
+export function showConfirmDialog(message) {
+  return Swal.fire({
+    title: "Konfirmasi",
+    text: message,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Ya",
+    cancelButtonText: "Tidak",
+  });
+}

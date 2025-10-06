@@ -1,14 +1,18 @@
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import useInput from '../../../hooks/useInput';
+import { asyncRegisterUser } from '../states/action';
 
 function RegisterPage() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [name, onNameChange] = useInput('');
   const [email, onEmailChange] = useInput('');
   const [password, onPasswordChange] = useInput('');
 
   function handleRegister(e) {
     e.preventDefault();
-    // Logika untuk dispatch action register akan ditambahkan di sini
-    alert(`Mencoba mendaftar dengan: ${name}, ${email}`);
+    dispatch(asyncRegisterUser({ name, email, password }, navigate));
   }
 
   return (
