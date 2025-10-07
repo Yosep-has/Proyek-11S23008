@@ -4,7 +4,7 @@ import authUserReducer from "./features/auth/states/reducer"; // <-- 1. Impor re
 
 const store = configureStore({
   reducer: {
-    // Daftarkan reducer yang sudah kita buat
+    // Daftarkan semua reducer di sini
     transactions: transactionsReducer,
     authUser: authUserReducer, // <-- 2. Daftarkan di sini
   },

@@ -98,3 +98,18 @@ export function asyncGetStatsMonthly(params) {
     }
   };
 }
+
+export function asyncUpdateCashFlow(id, formData, onSuccess) {
+  return async (dispatch) => {
+    try {
+      await cashFlowsApi.updateCashFlow(id, formData);
+      showSuccessDialog('Berhasil memperbarui data');
+      dispatch(asyncGetAllCashFlows());
+      dispatch(asyncGetStatsDaily({ total_data: 7 }));
+      dispatch(asyncGetStatsMonthly({ total_data: 12 }));
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      showErrorDialog(error.message);
+    }
+  };
+}

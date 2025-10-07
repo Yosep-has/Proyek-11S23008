@@ -7,7 +7,8 @@ function useInput(defaultValue = "") {
     setValue(event.target.value);
   };
 
-  return [value, onValueChangeHandler];
+  // Pastikan baris ini mengembalikan TIGA item
+  return [value, onValueChangeHandler, setValue];
 }
 
 export default useInput;

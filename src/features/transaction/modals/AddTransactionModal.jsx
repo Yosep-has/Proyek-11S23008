@@ -1,44 +1,45 @@
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { asyncAddCashFlow } from '../states/action';
+import { asyncUpdateCashFlow } from '../states/action';
 import useInput from '../../../hooks/useInput';
 
-// Fungsi untuk mendapatkan tanggal hari ini dalam format YYYY-MM-DD
-const getTodayDate = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-function AddTransactionModal({ show, onClose }) {
+function EditTransactionModal({ show, onClose, transaction }) {
   const dispatch = useDispatch();
 
-  const [type, onTypeChange] = useInput('inflow');
-  const [source, onSourceChange] = useInput('cash');
-  const [label, onLabelChange] = useInput('');
-  const [description, onDescriptionChange] = useInput('');
-  const [nominal, onNominalChange] = useInput('');
-  // State baru untuk tanggal, defaultnya hari ini
-  const [date, onDateChange] = useInput(getTodayDate());
+  const [type, onTypeChange, setType] = useInput('');
+  const [source, onSourceChange, setSource] = useInput('');
+  const [label, onLabelChange, setLabel] = useInput('');
+  const [description, onDescriptionChange, setDescription] = useInput('');
+  const [nominal, onNominalChange, setNominal] = useInput('');
+  const [date, onDateChange, setDate] = useInput('');
 
-  function handleSave() {
+  useEffect(() => {
+    if (transaction) {
+      setType(transaction.type);
+      setSource(transaction.source);
+      setLabel(transaction.label);
+      setDescription(transaction.description);
+      setNominal(transaction.nominal);
+      setDate(transaction.created_at.split(' ')[0]);
+    }
+  }, [transaction, setType, setSource, setLabel, setDescription, setNominal, setDate]);
+
+  function handleUpdate() {
     if (!label || !description || !nominal || !date) {
-      alert("Semua field harus diisi!");
+      alert('Semua field harus diisi!');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('type', type);
-    formData.append('source', source);
-    formData.append('label', label);
-    formData.append('description', description);
-    formData.append('nominal', nominal);
-    // Tambahkan tanggal ke FormData. API akan menerima ini sebagai 'created_at'.
-    // Kita tambahkan waktu agar sesuai format timestamp.
-    formData.append('created_at', `${date} 00:00:00`);
+    const updatedData = {
+      type,
+      source,
+      label,
+      description,
+      nominal,
+      created_at: `${date} 00:00:00`,
+    };
 
-    dispatch(asyncAddCashFlow(formData, onClose));
+    dispatch(asyncUpdateCashFlow(transaction.id, updatedData, onClose));
   }
 
   if (!show) return null;
@@ -50,11 +51,10 @@ function AddTransactionModal({ show, onClose }) {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">Tambah Transaksi Baru</h5>
+              <h5 className="modal-title">Edit Transaksi</h5>
               <button type="button" className="btn-close" onClick={onClose}></button>
             </div>
             <div className="modal-body">
-              {/* Input Tanggal Baru */}
               <div className="mb-3">
                 <label className="form-label">Tanggal Transaksi</label>
                 <input type="date" className="form-control" value={date} onChange={onDateChange} />
@@ -76,7 +76,7 @@ function AddTransactionModal({ show, onClose }) {
               </div>
               <div className="mb-3">
                 <label className="form-label">Label</label>
-                <input type="text" className="form-control" value={label} onChange={onLabelChange} placeholder="Contoh: gaji, makanan" />
+                <input type="text" className="form-control" value={label} onChange={onLabelChange} />
               </div>
               <div className="mb-3">
                 <label className="form-label">Deskripsi</label>
@@ -84,12 +84,12 @@ function AddTransactionModal({ show, onClose }) {
               </div>
               <div className="mb-3">
                 <label className="form-label">Nominal (Rp)</label>
-                <input type="number" className="form-control" value={nominal} onChange={onNominalChange} placeholder="Contoh: 50000" />
+                <input type="number" className="form-control" value={nominal} onChange={onNominalChange} />
               </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={onClose}>Batal</button>
-              <button type="button" className="btn btn-primary" onClick={handleSave}>Simpan</button>
+              <button type="button" className="btn btn-primary" onClick={handleUpdate}>Simpan Perubahan</button>
             </div>
           </div>
         </div>
@@ -98,4 +98,4 @@ function AddTransactionModal({ show, onClose }) {
   );
 }
 
-export default AddTransactionModal;
+export default EditTransactionModal;

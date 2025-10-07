@@ -9,6 +9,8 @@ import {
 } from '../states/action';
 import { asyncUnsetAuthUser } from '../../auth/states/action';
 import AddTransactionModal from '../modals/AddTransactionModal';
+// Perhatikan baris di bawah ini, path-nya sudah diperbaiki
+import EditTransactionModal from '../modals/EditTransactionModal';
 import StatsTable from '../components/StatsTable';
 
 function DashboardPage() {
@@ -16,6 +18,8 @@ function DashboardPage() {
   const navigate = useNavigate();
   const { list: transactions, stats, statsDaily, statsMonthly } = useSelector((state) => state.transactions);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   useEffect(() => {
     dispatch(asyncGetAllCashFlows());
@@ -29,6 +33,11 @@ function DashboardPage() {
 
   const handleDelete = (id) => {
     dispatch(asyncDeleteCashFlow(id));
+  };
+
+  const handleEdit = (transaction) => {
+    setSelectedTransaction(transaction);
+    setShowEditModal(true);
   };
 
   const formatCurrency = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number || 0);
@@ -130,6 +139,9 @@ function DashboardPage() {
                       {formatCurrency(trx.nominal)}
                     </td>
                     <td className="text-center">
+                      <button className="btn btn-warning btn-sm me-2" onClick={() => handleEdit(trx)}>
+                        <i className="bi bi-pencil"></i>
+                      </button>
                       <button className="btn btn-danger btn-sm" onClick={() => handleDelete(trx.id)}>
                         <i className="bi bi-trash"></i>
                       </button>
@@ -148,6 +160,7 @@ function DashboardPage() {
 
       {/* Modal */}
       <AddTransactionModal show={showAddModal} onClose={() => setShowAddModal(false)} />
+      <EditTransactionModal show={showEditModal} onClose={() => setShowEditModal(false)} transaction={selectedTransaction} />
     </div>
   );
 }
