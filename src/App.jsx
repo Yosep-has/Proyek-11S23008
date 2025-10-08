@@ -1,9 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DashboardPage from './features/transaction/pages/DashboardPage';
 import LoginPage from './features/auth/pages/LoginPage';
-import RegisterPage from './features/auth/pages/RegisterPage'; // <-- 1. Impor komponen baru
+import RegisterPage from './features/auth/pages/RegisterPage';
 import AuthLayout from './features/auth/layouts/AuthLayout';
 import MainLayout from './layouts/MainLayout';
+import DetailPage from './features/transaction/pages/DetailPage'; // Impor halaman detail
 
 function App() {
   return (
@@ -11,12 +12,14 @@ function App() {
       {/* Rute Publik untuk Login & Daftar */}
       <Route path="/auth" element={<AuthLayout />}>
         <Route path="login" element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} /> {/* <-- 2. Tambahkan rute ini */}
+        <Route path="register" element={<RegisterPage />} />
       </Route>
 
       {/* Rute Terproteksi untuk Aplikasi Utama */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<DashboardPage />} />
+        {/* Rute baru untuk detail transaksi */}
+        <Route path="transaction/:id" element={<DetailPage />} />
       </Route>
 
       {/* Jika user membuka path lain, arahkan ke halaman utama */}

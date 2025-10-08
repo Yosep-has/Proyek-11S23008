@@ -1,11 +1,12 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   asyncGetAllCashFlows,
   asyncDeleteCashFlow,
   asyncGetStatsDaily,
   asyncGetStatsMonthly,
+  asyncUpdateCashFlow, // Pastikan ini diimpor
 } from '../states/action';
 import { asyncUnsetAuthUser } from '../../auth/states/action';
 import AddTransactionModal from '../modals/AddTransactionModal';
@@ -30,12 +31,10 @@ function DashboardPage() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
 
-  // Gunakan useMemo untuk memfilter transaksi secara reaktif dan efisien
   const dailyTransactions = useMemo(() => {
     return allTransactions.filter(trx => trx.created_at.startsWith(selectedDate));
   }, [selectedDate, allTransactions]);
 
-  // Fungsi untuk memuat data awal
   const fetchInitialData = useCallback(() => {
     const today = getTodayDate();
     dispatch(asyncGetAllCashFlows());
@@ -184,7 +183,9 @@ function DashboardPage() {
                 {allTransactions && allTransactions.length > 0 ? allTransactions.map((trx) => (
                   <tr key={trx.id}>
                     <td>{formatDate(trx.created_at)}</td>
-                    <td>{trx.description}</td>
+                    <td>
+                        <Link to={`/transaction/${trx.id}`}>{trx.description}</Link>
+                    </td>
                     <td><span className="badge bg-secondary">{trx.label}</span></td>
                     <td>
                       <span className={`badge ${trx.type === 'inflow' ? 'bg-success-subtle text-success-emphasis' : 'bg-danger-subtle text-danger-emphasis'}`}>

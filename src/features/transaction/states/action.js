@@ -1,28 +1,23 @@
 import cashFlowsApi from '../api/cashFlowsApi';
 import { showSuccessDialog, showErrorDialog, showConfirmDialog } from '../../../helpers/toolsHelper';
 
-// Helper untuk mendapatkan tanggal hari ini
 const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 export const ActionType = {
   SET_CASH_FLOWS: 'SET_CASH_FLOWS',
-  SET_FILTERED_CASH_FLOWS: 'SET_FILTERED_CASH_FLOWS',
   SET_STATS: 'SET_STATS',
   ADD_CASH_FLOW: 'ADD_CASH_FLOW',
   SET_STATS_DAILY: 'SET_STATS_DAILY',
   SET_STATS_MONTHLY: 'SET_STATS_MONTHLY',
 };
 
-// ... (semua action creator tidak berubah)
+// Action creators
 export function setCashFlowsActionCreator(cashFlows) { return { type: ActionType.SET_CASH_FLOWS, payload: cashFlows }; }
-export function setFilteredCashFlowsActionCreator(cashFlows) { return { type: ActionType.SET_FILTERED_CASH_FLOWS, payload: cashFlows }; }
 export function setStatsActionCreator(stats) { return { type: ActionType.SET_STATS, payload: stats }; }
 export function setStatsDailyActionCreator(statsDaily) { return { type: ActionType.SET_STATS_DAILY, payload: statsDaily }; }
 export function setStatsMonthlyActionCreator(statsMonthly) { return { type: ActionType.SET_STATS_MONTHLY, payload: statsMonthly }; }
 
-
-// --- PERBAIKAN UTAMA DI SINI ---
-// Fungsi terpusat untuk memuat ulang semua data dan statistik
+// Fungsi terpusat untuk memuat ulang semua data
 function fetchAllData() {
   return async (dispatch) => {
     const today = getTodayDate();
@@ -31,8 +26,8 @@ function fetchAllData() {
     dispatch(asyncGetStatsMonthly({ end_date: today, total_data: 12 }));
   };
 }
-// --- SELESAI ---
 
+// Thunks
 export function asyncGetAllCashFlows(params = {}) {
   return async (dispatch) => {
     try {
@@ -50,7 +45,7 @@ export function asyncAddCashFlow(formData, onSuccess) {
     try {
       await cashFlowsApi.addCashFlow(formData);
       showSuccessDialog('Berhasil menambahkan data');
-      dispatch(fetchAllData()); // Panggil fungsi terpusat
+      dispatch(fetchAllData());
       if (onSuccess) onSuccess();
     } catch (error) {
       showErrorDialog(error.message);
@@ -58,12 +53,13 @@ export function asyncAddCashFlow(formData, onSuccess) {
   };
 }
 
+// FUNGSI BARU YANG PERLU DITAMBAHKAN
 export function asyncUpdateCashFlow(id, data, onSuccess) {
   return async (dispatch) => {
     try {
       await cashFlowsApi.updateCashFlow(id, data);
       showSuccessDialog('Berhasil memperbarui data');
-      dispatch(fetchAllData()); // Panggil fungsi terpusat
+      dispatch(fetchAllData());
       if (onSuccess) onSuccess();
     } catch (error) {
       showErrorDialog(error.message);
@@ -76,9 +72,9 @@ export function asyncDeleteCashFlow(id) {
     const confirmation = await showConfirmDialog('Apakah Anda yakin ingin menghapus transaksi ini?');
     if (confirmation.isConfirmed) {
       try {
-        const message = await cashFlowsApi.deleteCashFlow(id);
-        showSuccessDialog(message);
-        dispatch(fetchAllData()); // Panggil fungsi terpusat
+        await cashFlowsApi.deleteCashFlow(id);
+        showSuccessDialog('Berhasil menghapus data');
+        dispatch(fetchAllData());
       } catch (error) {
         showErrorDialog(error.message);
       }
