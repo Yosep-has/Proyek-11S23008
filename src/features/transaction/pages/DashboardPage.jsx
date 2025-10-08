@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -9,23 +9,47 @@ import {
 } from '../states/action';
 import { asyncUnsetAuthUser } from '../../auth/states/action';
 import AddTransactionModal from '../modals/AddTransactionModal';
-// Perhatikan baris di bawah ini, path-nya sudah diperbaiki
 import EditTransactionModal from '../modals/EditTransactionModal';
 import StatsTable from '../components/StatsTable';
+import DailyBook from '../components/DailyBook';
+
+const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 function DashboardPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { list: transactions, stats, statsDaily, statsMonthly } = useSelector((state) => state.transactions);
+  const {
+    list: allTransactions,
+    stats,
+    statsDaily,
+    statsMonthly,
+  } = useSelector((state) => state.transactions);
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(getTodayDate());
+
+  // Gunakan useMemo untuk memfilter transaksi secara reaktif dan efisien
+  const dailyTransactions = useMemo(() => {
+    return allTransactions.filter(trx => trx.created_at.startsWith(selectedDate));
+  }, [selectedDate, allTransactions]);
+
+  // Fungsi untuk memuat data awal
+  const fetchInitialData = useCallback(() => {
+    const today = getTodayDate();
+    dispatch(asyncGetAllCashFlows());
+    dispatch(asyncGetStatsDaily({ end_date: today, total_data: 7 }));
+    dispatch(asyncGetStatsMonthly({ end_date: today, total_data: 12 }));
+  }, [dispatch]);
 
   useEffect(() => {
-    dispatch(asyncGetAllCashFlows());
-    dispatch(asyncGetStatsDaily({ total_data: 7 }));
-    dispatch(asyncGetStatsMonthly({ total_data: 12 }));
-  }, [dispatch]);
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value);
+  };
 
   const handleLogout = () => {
     dispatch(asyncUnsetAuthUser(navigate));
@@ -40,16 +64,23 @@ function DashboardPage() {
     setShowEditModal(true);
   };
 
+  const handleModalClose = () => {
+    setShowAddModal(false);
+    setShowEditModal(false);
+  };
+
   const formatCurrency = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number || 0);
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
+    const date = new Date(dateString.split(' ')[0]);
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('id-ID', options);
+    return date.toLocaleDateString('id-ID', options);
   };
 
   return (
     <div className="container py-4">
+      {/* Header dan Ringkasan Total */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Dashboard Arus Kas</h1>
         <div>
@@ -61,8 +92,6 @@ function DashboardPage() {
           </button>
         </div>
       </div>
-
-      {/* Stats Ringkasan */}
       <div className="row mb-4">
         <div className="col-md-4 mb-3">
           <div className="card text-white bg-success shadow-sm">
@@ -90,7 +119,34 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Statistik Harian & Bulanan */}
+      {/* Pembukuan Harian */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <div className="d-flex align-items-center mb-2">
+                <label htmlFor="date-filter" className="form-label me-3 mb-0 fw-bold fs-5">Pembukuan Harian</label>
+                <input
+                  type="date"
+                  id="date-filter"
+                  className="form-control"
+                  style={{ width: '220px' }}
+                  value={selectedDate}
+                  onChange={handleDateChange}
+                />
+              </div>
+              <DailyBook
+                transactions={dailyTransactions}
+                selectedDate={selectedDate}
+                formatCurrency={formatCurrency}
+                formatDate={formatDate}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Statistik 7 Hari & 12 Bulan */}
       <div className="row mb-4">
         <div className="col-lg-6 mb-3">
           <StatsTable
@@ -108,11 +164,11 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Riwayat Transaksi */}
+      {/* Riwayat Semua Transaksi */}
       <div className="card shadow-sm">
         <div className="card-body">
-          <h4 className="card-title">Riwayat Transaksi</h4>
-          <div className="table-responsive">
+          <h4 className="card-title">Semua Riwayat Transaksi</h4>
+          <div className="table-responsive" style={{ maxHeight: '400px' }}>
             <table className="table table-striped table-hover">
               <thead>
                 <tr>
@@ -125,7 +181,7 @@ function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {transactions && transactions.length > 0 ? transactions.map((trx) => (
+                {allTransactions && allTransactions.length > 0 ? allTransactions.map((trx) => (
                   <tr key={trx.id}>
                     <td>{formatDate(trx.created_at)}</td>
                     <td>{trx.description}</td>
@@ -159,8 +215,8 @@ function DashboardPage() {
       </div>
 
       {/* Modal */}
-      <AddTransactionModal show={showAddModal} onClose={() => setShowAddModal(false)} />
-      <EditTransactionModal show={showEditModal} onClose={() => setShowEditModal(false)} transaction={selectedTransaction} />
+      <AddTransactionModal show={showAddModal} onClose={handleModalClose} />
+      <EditTransactionModal show={showEditModal} onClose={handleModalClose} transaction={selectedTransaction} />
     </div>
   );
 }

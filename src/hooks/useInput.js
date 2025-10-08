@@ -7,7 +7,7 @@ function useInput(defaultValue = "") {
     setValue(event.target.value);
   };
 
-  // Pastikan baris ini mengembalikan TIGA item
+  // Pastikan return statement seperti ini
   return [value, onValueChangeHandler, setValue];
 }
 
