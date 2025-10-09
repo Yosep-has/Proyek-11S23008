@@ -20,7 +20,16 @@ function EditTransactionModal({ show, onClose, transaction }) {
       setLabel(transaction.label);
       setDescription(transaction.description);
       setNominal(transaction.nominal);
-      setDate(transaction.created_at.split(' ')[0]);
+
+      // --- PERBAIKAN ADA DI SINI ---
+      // Mengubah format tanggal dari server menjadi 'YYYY-MM-DD' 
+      // agar sesuai dengan input type="date"
+      const transactionDate = new Date(transaction.created_at);
+      const year = transactionDate.getFullYear();
+      const month = String(transactionDate.getMonth() + 1).padStart(2, '0');
+      const day = String(transactionDate.getDate()).padStart(2, '0');
+      setDate(`${year}-${month}-${day}`);
+      // --- SELESAI ---
     }
   }, [transaction, setType, setSource, setLabel, setDescription, setNominal, setDate]);
 

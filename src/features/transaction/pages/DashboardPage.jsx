@@ -6,13 +6,13 @@ import {
   asyncDeleteCashFlow,
   asyncGetStatsDaily,
   asyncGetStatsMonthly,
-  asyncUpdateCashFlow, // Pastikan ini diimpor
 } from '../states/action';
 import { asyncUnsetAuthUser } from '../../auth/states/action';
 import AddTransactionModal from '../modals/AddTransactionModal';
 import EditTransactionModal from '../modals/EditTransactionModal';
 import StatsTable from '../components/StatsTable';
 import DailyBook from '../components/DailyBook';
+import StatsChart from '../components/StatsChart';
 
 const getTodayDate = () => new Date().toISOString().split('T')[0];
 
@@ -30,6 +30,9 @@ function DashboardPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
+  
+  // --- PERUBAHAN 1: State untuk visibilitas grafik ---
+  const [showCharts, setShowCharts] = useState(false);
 
   const dailyTransactions = useMemo(() => {
     return allTransactions.filter(trx => trx.created_at.startsWith(selectedDate));
@@ -145,7 +148,26 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Statistik 7 Hari & 12 Bulan */}
+      {/* --- PERUBAHAN 2: Tombol untuk menampilkan/menyembunyikan grafik --- */}
+      <div className="d-flex justify-content-center mb-4">
+        <button className="btn btn-outline-secondary" onClick={() => setShowCharts(!showCharts)}>
+          {showCharts ? 'Sembunyikan Grafik' : 'Tampilkan Grafik'}
+        </button>
+      </div>
+
+      {/* --- PERUBAHAN 3: Bungkus grafik dengan kondisional render --- */}
+      {showCharts && (
+        <div className="row mb-4">
+          <div className="col-lg-6 mb-3">
+            <StatsChart title="Grafik Harian (7 Hari Terakhir)" statsData={statsDaily} />
+          </div>
+          <div className="col-lg-6 mb-3">
+            <StatsChart title="Grafik Bulanan (12 Bulan Terakhir)" statsData={statsMonthly} />
+          </div>
+        </div>
+      )}
+
+      {/* Statistik 7 Hari & 12 Bulan (Tabel) */}
       <div className="row mb-4">
         <div className="col-lg-6 mb-3">
           <StatsTable
