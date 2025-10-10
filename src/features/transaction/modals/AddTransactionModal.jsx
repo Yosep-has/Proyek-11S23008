@@ -2,27 +2,21 @@ import { useDispatch } from 'react-redux';
 import { asyncAddCashFlow } from '../states/action';
 import useInput from '../../../hooks/useInput';
 
-const getTodayDate = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+// Fungsi getTodayDate sudah tidak diperlukan dan bisa dihapus
 
 function AddTransactionModal({ show, onClose }) {
   const dispatch = useDispatch();
 
-  // Ambil dua nilai pertama, abaikan yang ketiga
   const [type, onTypeChange] = useInput('inflow');
   const [source, onSourceChange] = useInput('cash');
-  const [label, onLabelChange] = useInput('');
-  const [description, onDescriptionChange] = useInput('');
-  const [nominal, onNominalChange] = useInput('');
-  const [date, onDateChange] = useInput(getTodayDate());
+  const [label, onLabelChange, setLabel] = useInput('');
+  const [description, onDescriptionChange, setDescription] = useInput('');
+  const [nominal, onNominalChange, setNominal] = useInput('');
+  // State untuk 'date' sudah dihapus
 
   function handleSave() {
-    if (!label || !description || !nominal || !date) {
+    // Validasi tanpa tanggal
+    if (!label || !description || !nominal) {
       alert("Semua field harus diisi!");
       return;
     }
@@ -33,9 +27,17 @@ function AddTransactionModal({ show, onClose }) {
     formData.append('label', label);
     formData.append('description', description);
     formData.append('nominal', nominal);
-    formData.append('created_at', `${date} 00:00:00`);
+    // Pengiriman 'created_at' sudah dihapus
 
-    dispatch(asyncAddCashFlow(formData, onClose));
+    // Kita perlu me-reset field setelah berhasil
+    const onSuccess = () => {
+      setLabel('');
+      setDescription('');
+      setNominal('');
+      onClose(); // Tutup modal
+    };
+
+    dispatch(asyncAddCashFlow(formData, onSuccess));
   }
 
   if (!show) return null;
@@ -51,10 +53,8 @@ function AddTransactionModal({ show, onClose }) {
               <button type="button" className="btn-close" onClick={onClose}></button>
             </div>
             <div className="modal-body">
-              <div className="mb-3">
-                <label className="form-label">Tanggal Transaksi</label>
-                <input type="date" className="form-control" value={date} onChange={onDateChange} />
-              </div>
+              {/* === INPUT TANGGAL TELAH DIHAPUS DARI SINI === */}
+
               <div className="mb-3">
                 <label className="form-label">Tipe</label>
                 <select className="form-select" value={type} onChange={onTypeChange}>
