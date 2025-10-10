@@ -6,13 +6,14 @@ import useInput from '../../../hooks/useInput';
 function EditTransactionModal({ show, onClose, transaction }) {
   const dispatch = useDispatch();
 
+  // State untuk input form, 'date' sudah dihapus
   const [type, onTypeChange, setType] = useInput('');
   const [source, onSourceChange, setSource] = useInput('');
   const [label, onLabelChange, setLabel] = useInput('');
   const [description, onDescriptionChange, setDescription] = useInput('');
   const [nominal, onNominalChange, setNominal] = useInput('');
-  const [date, onDateChange, setDate] = useInput('');
 
+  // Mengisi form saat data transaksi tersedia
   useEffect(() => {
     if (transaction) {
       setType(transaction.type);
@@ -20,32 +21,24 @@ function EditTransactionModal({ show, onClose, transaction }) {
       setLabel(transaction.label);
       setDescription(transaction.description);
       setNominal(transaction.nominal);
-
-      // --- PERBAIKAN ADA DI SINI ---
-      // Mengubah format tanggal dari server menjadi 'YYYY-MM-DD' 
-      // agar sesuai dengan input type="date"
-      const transactionDate = new Date(transaction.created_at);
-      const year = transactionDate.getFullYear();
-      const month = String(transactionDate.getMonth() + 1).padStart(2, '0');
-      const day = String(transactionDate.getDate()).padStart(2, '0');
-      setDate(`${year}-${month}-${day}`);
-      // --- SELESAI ---
+      // Logika untuk 'setDate' sudah dihapus
     }
-  }, [transaction, setType, setSource, setLabel, setDescription, setNominal, setDate]);
+  }, [transaction, setType, setSource, setLabel, setDescription, setNominal]);
 
   function handleUpdate() {
-    if (!label || !description || !nominal || !date) {
+    // Validasi tanpa tanggal
+    if (!label || !description || !nominal) {
       alert('Semua field harus diisi!');
       return;
     }
 
+    // Data yang akan dikirim, tanpa 'created_at'
     const updatedData = {
       type,
       source,
       label,
       description,
       nominal,
-      created_at: `${date} 00:00:00`,
     };
 
     dispatch(asyncUpdateCashFlow(transaction.id, updatedData, onClose));
@@ -64,10 +57,8 @@ function EditTransactionModal({ show, onClose, transaction }) {
               <button type="button" className="btn-close" onClick={onClose}></button>
             </div>
             <div className="modal-body">
-              <div className="mb-3">
-                <label className="form-label">Tanggal Transaksi</label>
-                <input type="date" className="form-control" value={date} onChange={onDateChange} />
-              </div>
+              {/* === INPUT TANGGAL TELAH DIHAPUS DARI SINI === */}
+              
               <div className="mb-3">
                 <label className="form-label">Tipe</label>
                 <select className="form-select" value={type} onChange={onTypeChange}>

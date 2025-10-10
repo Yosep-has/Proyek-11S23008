@@ -30,8 +30,6 @@ function DashboardPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
-  
-  // --- PERUBAHAN 1: State untuk visibilitas grafik ---
   const [showCharts, setShowCharts] = useState(false);
 
   const dailyTransactions = useMemo(() => {
@@ -148,14 +146,14 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* --- PERUBAHAN 2: Tombol untuk menampilkan/menyembunyikan grafik --- */}
+      {/* Tombol untuk menampilkan/menyembunyikan grafik */}
       <div className="d-flex justify-content-center mb-4">
         <button className="btn btn-outline-secondary" onClick={() => setShowCharts(!showCharts)}>
           {showCharts ? 'Sembunyikan Grafik' : 'Tampilkan Grafik'}
         </button>
       </div>
 
-      {/* --- PERUBAHAN 3: Bungkus grafik dengan kondisional render --- */}
+      {/* Bungkus grafik dengan kondisional render */}
       {showCharts && (
         <div className="row mb-4">
           <div className="col-lg-6 mb-3">
