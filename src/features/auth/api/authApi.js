@@ -11,7 +11,8 @@ const authApi = (() => {
     });
     const { success, message, data } = await response.json();
     if (!success) throw new Error(message);
-    return data.token;
+    // Kembalikan seluruh data (termasuk user)
+    return data;
   }
 
   async function register({ name, email, password }) {
@@ -25,7 +26,18 @@ const authApi = (() => {
     return message;
   }
 
-  return { login, register }; // <-- Perbaikan ada di baris ini
+  // Fungsi untuk mengambil profil pengguna
+  async function getOwnProfile() {
+    // URL DIUBAH KE ENDPOINT YANG BENAR (/auth/me)
+    const response = await apiHelper.fetchData(`${BASE_URL}/me`, {
+      method: 'GET',
+    });
+    const { success, message, data } = await response.json();
+    if (!success) throw new Error(message);
+    return data; // Kembalikan data user
+  }
+
+  return { login, register, getOwnProfile }; // Ekspor fungsi baru
 })();
 
 export default authApi;

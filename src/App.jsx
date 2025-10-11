@@ -1,12 +1,22 @@
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DashboardPage from './features/transaction/pages/DashboardPage';
 import LoginPage from './features/auth/pages/LoginPage';
 import RegisterPage from './features/auth/pages/RegisterPage';
 import AuthLayout from './features/auth/layouts/AuthLayout';
 import MainLayout from './layouts/MainLayout';
-import DetailPage from './features/transaction/pages/DetailPage'; // Impor halaman detail
+import DetailPage from './features/transaction/pages/DetailPage';
+import { asyncPreloadProcess } from './features/auth/states/action';
 
 function App() {
+  const dispatch = useDispatch();
+
+  // Jalankan proses preload saat aplikasi dimuat
+  useEffect(() => {
+    dispatch(asyncPreloadProcess());
+  }, [dispatch]);
+
   return (
     <Routes>
       {/* Rute Publik untuk Login & Daftar */}
@@ -18,7 +28,6 @@ function App() {
       {/* Rute Terproteksi untuk Aplikasi Utama */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<DashboardPage />} />
-        {/* Rute baru untuk detail transaksi */}
         <Route path="transaction/:id" element={<DetailPage />} />
       </Route>
 

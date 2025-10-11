@@ -19,12 +19,17 @@ const getTodayDate = () => new Date().toISOString().split('T')[0];
 function DashboardPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Mengambil data dari reducer 'transactions'
   const {
     list: allTransactions,
     stats,
     statsDaily,
     statsMonthly,
   } = useSelector((state) => state.transactions);
+
+  // Mengambil data pengguna dari reducer 'authUser'
+  const authUser = useSelector((state) => state.authUser);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -83,7 +88,10 @@ function DashboardPage() {
       {/* Header dan Ringkasan Total */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Dashboard Arus Kas</h1>
-        <div>
+        <div className="d-flex align-items-center">
+          {/* Menampilkan nama pengguna yang login */}
+          {authUser && <span className="me-3">Halo, <strong>{authUser.name}</strong>!</span>}
+
           <button className="btn btn-primary me-2" onClick={() => setShowAddModal(true)}>
             <i className="bi bi-plus-lg me-2"></i>Tambah Transaksi
           </button>

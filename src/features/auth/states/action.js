@@ -1,5 +1,5 @@
 import apiHelper from '../../../helpers/apiHelper';
-import authApi from '../api/authApi'; // <-- Seharusnya mengimpor dari sini
+import authApi from '../api/authApi';
 import { showSuccessDialog, showErrorDialog } from '../../../helpers/toolsHelper';
 
 export const ActionType = {
@@ -19,9 +19,11 @@ export function unsetAuthUserActionCreator() {
 export function asyncSetAuthUser({ email, password }, navigate) {
   return async (dispatch) => {
     try {
-      const token = await authApi.login({ email, password });
+      // data sekarang berisi { token, user }
+      const { token, user } = await authApi.login({ email, password });
       apiHelper.putAccessToken(token);
-      dispatch(setAuthUserActionCreator({ token }));
+      // Kirim data 'user' ke reducer
+      dispatch(setAuthUserActionCreator(user));
       navigate('/');
     } catch (error) {
       showErrorDialog(error.message);
@@ -47,6 +49,22 @@ export function asyncRegisterUser({ name, email, password }, navigate) {
       navigate('/auth/login');
     } catch (error) {
       showErrorDialog(error.message);
+    }
+  };
+}
+
+// FUNGSI BARU: Untuk memuat sesi pengguna saat refresh halaman
+export function asyncPreloadProcess() {
+  return async (dispatch) => {
+    try {
+      const token = apiHelper.getAccessToken();
+      if (token) {
+        const user = await authApi.getOwnProfile();
+        dispatch(setAuthUserActionCreator(user));
+      }
+    } catch (error) {
+      // Jika token tidak valid, logout pengguna
+      dispatch(asyncUnsetAuthUser(() => {}));
     }
   };
 }
